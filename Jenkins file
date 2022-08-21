@@ -1,0 +1,29 @@
+pipeline{
+    agent any
+    tools {
+        maven 'Maven Home'
+    }
+    stages {
+        stage('Build Maven') {
+            steps{
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/rash178/jenkins-docker.git']]])
+                bat "mvn -Dmaven.test.failure.ignore=true clean package"
+                }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                  bat 'docker build -t rash1708/my-app-1.0 .'
+                }
+            }
+        }
+        stage('Deploy Docker Image') {
+            steps {
+                script {
+                    bat 'docker login -u rash1708 -p dckr_pat_0xtZyDOV-t5dtpLwKHt3ITG3GGQ'
+                 }  
+                 bat 'docker push rash1708/my-app-1.0'
+                }
+            }
+        }
+    }
